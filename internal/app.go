@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -26,7 +27,10 @@ type config struct {
 	accrualSystemAddr string
 }
 
+var Logger zap.SugaredLogger
+
 func InitApp(ctx context.Context) (*App, error) {
+	initLogger()
 	c := initConfig()
 	if err := checkConfig(c); err != nil {
 		return nil, err
@@ -91,4 +95,20 @@ func checkConfig(c *config) error {
 	}
 
 	return nil
+}
+
+func initLogger() {
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+
+	defer func(logger *zap.Logger) {
+		err = logger.Sync()
+	}(logger)
+
+	if err != nil {
+		panic(err)
+	}
+	Logger = *logger.Sugar()
 }
