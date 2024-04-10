@@ -4,15 +4,17 @@ import (
 	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/sotavant/yandex-diplom-one/internal"
+	"github.com/sotavant/yandex-diplom-one/internal/repository/pgsql"
 	"github.com/sotavant/yandex-diplom-one/internal/rest"
 	"github.com/sotavant/yandex-diplom-one/internal/rest/middleware"
 	"github.com/sotavant/yandex-diplom-one/user"
+	"net/http"
 )
 
 // test encoding
 func main() {
 	ctx := context.Background()
-	_, err := internal.InitApp(ctx)
+	app, err := internal.InitApp(ctx)
 
 	if err != nil {
 		panic(err)
@@ -21,6 +23,16 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Gzip)
 
-	userService := user.NewService()
+	userRepo, err := pgsql.NewUserRepository(ctx, app.DBPool)
+	if err != nil {
+		panic(err)
+	}
+
+	userService := user.NewService(userRepo)
 	rest.NewUserHandler(r, userService)
+
+	err = http.ListenAndServe(app.Address, r)
+	if err != nil {
+		panic(err)
+	}
 }

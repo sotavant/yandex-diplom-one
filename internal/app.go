@@ -55,6 +55,8 @@ func initConfig() *config {
 	flag.StringVar(&c.databaseURI, "d", "", "database uri")
 	flag.StringVar(&c.accrualSystemAddr, "r", "", "accrual system address")
 
+	flag.Parse()
+
 	if envVar := os.Getenv(runAddressVar); envVar != "" {
 		c.runAddress = envVar
 	}
