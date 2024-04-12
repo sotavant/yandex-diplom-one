@@ -26,14 +26,14 @@ func NewUserHandler(r *chi.Mux, service *user.Service) {
 }
 
 func (u *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	user := &userRequest{}
-	if err := render.Bind(r, user); err != nil {
+	userRequest := &userRequest{}
+	if err := render.Bind(r, userRequest); err != nil {
 		render.Status(r, http.StatusBadRequest)
 		internal.Logger.Infoln(err)
 		return
 	}
 
-	token, err := u.Service.Register(r.Context(), *user.User)
+	token, err := u.Service.Register(r.Context(), *userRequest.User)
 	if err != nil {
 		err = render.Render(w, r, errorRender(getStatusCode(err), err))
 		if err != nil {
@@ -65,12 +65,12 @@ func (u *userRequest) Bind(r *http.Request) error {
 }
 
 type tokenResponse struct {
-	token string
+	Token string `json:"token"`
 }
 
 func newTokenResponse(token string) *tokenResponse {
 	return &tokenResponse{
-		token: token,
+		Token: token,
 	}
 }
 

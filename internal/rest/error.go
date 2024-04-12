@@ -22,7 +22,7 @@ func errorRender(code int, err error) render.Renderer {
 	return &errResponse{
 		Err:            err,
 		HTTPStatusCode: code,
-		StatusText:     "",
+		StatusText:     http.StatusText(code),
 		ErrorText:      err.Error(),
 	}
 }

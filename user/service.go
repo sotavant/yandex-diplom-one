@@ -32,13 +32,13 @@ func (u *Service) Register(ctx context.Context, user domain.User) (string, error
 		return "", domain.ErrBadParams
 	}
 
-	user, err := u.userRepo.GetByLogin(ctx, user.Login)
+	dbUser, err := u.userRepo.GetByLogin(ctx, user.Login)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		internal.Logger.Infow("error in get by login", "err", err)
 		return "", domain.ErrInternalServerError
 	}
 
-	if err == nil {
+	if (err != nil && errors.Is(err, pgx.ErrNoRows)) || (err == nil && dbUser.ID != 0) {
 		return "", domain.ErrLoginExist
 	}
 
