@@ -26,10 +26,12 @@ func NewUserHandler(r *chi.Mux, service *user.Service) {
 		Service: service,
 	}
 
-	r.Route("/api/user", func(r chi.Router) {
+	r.Group(func(r chi.Router) {
 		r.Use(render.SetContentType(render.ContentTypeJSON))
-		r.Post(fmt.Sprintf("/%s", registerURI), handler.Auth)
-		r.Post(fmt.Sprintf("/%s", loginURI), handler.Auth)
+		r.Route("/api/user", func(r chi.Router) {
+			r.Post(fmt.Sprintf("/%s", registerURI), handler.Auth)
+			r.Post(fmt.Sprintf("/%s", loginURI), handler.Auth)
+		})
 	})
 }
 

@@ -30,6 +30,7 @@ func main() {
 
 	userService := user.NewService(userRepo)
 	rest.NewUserHandler(r, userService)
+	rest.NewOrdersHandler(r)
 
 	err = http.ListenAndServe(app.Address, r)
 	if err != nil {
