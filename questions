@@ -1,3 +1,5 @@
 1. Structure
 2. return token. via header or json response ({token: slkdjf})
 3. check logic
+4. userId in context
+5. "Bearer "  in Authorization header

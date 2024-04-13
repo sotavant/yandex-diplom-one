@@ -11,6 +11,7 @@ import (
 )
 
 const passwordMinLength = 6
+const ContextUserIdKey = "userId"
 
 type Service struct {
 	userRepo UserRepository

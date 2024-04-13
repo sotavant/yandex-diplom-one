@@ -36,23 +36,24 @@ func NewUserHandler(r *chi.Mux, service *user.Service) {
 }
 
 func (u *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
-	userRequest := &userRequest{}
-	if err := render.Bind(r, userRequest); err != nil {
+	userReq := &userRequest{}
+	if err := render.Bind(r, userReq); err != nil {
 		err = render.Render(w, r, errorRender(http.StatusBadRequest, err))
 		if err != nil {
 			render.Status(r, http.StatusInternalServerError)
 			internal.Logger.Infoln(err)
 		}
 		return
+
 	}
 
 	var token string
 	var err error
 
 	if isRegisterPage(r.RequestURI) {
-		token, err = u.Service.Register(r.Context(), *userRequest.User)
+		token, err = u.Service.Register(r.Context(), *userReq.User)
 	} else {
-		token, err = u.Service.Login(r.Context(), *userRequest.User)
+		token, err = u.Service.Login(r.Context(), *userReq.User)
 	}
 
 	if err != nil {
@@ -101,25 +102,6 @@ func newTokenResponse(token string) *tokenResponse {
 
 func (t *tokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
-}
-
-func getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
-
-	switch err {
-	case domain.ErrInternalServerError:
-		return http.StatusInternalServerError
-	case domain.ErrBadParams, domain.ErrPasswordTooWeak:
-		return http.StatusBadRequest
-	case domain.ErrLoginExist:
-		return http.StatusConflict
-	case domain.ErrBadUserData:
-		return http.StatusUnauthorized
-	default:
-		return http.StatusInternalServerError
-	}
 }
 
 func isRegisterPage(url string) bool {

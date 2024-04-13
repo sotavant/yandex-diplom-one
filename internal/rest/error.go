@@ -2,6 +2,7 @@ package rest
 
 import (
 	"github.com/go-chi/render"
+	"github.com/sotavant/yandex-diplom-one/domain"
 	"net/http"
 )
 
@@ -24,5 +25,24 @@ func errorRender(code int, err error) render.Renderer {
 		HTTPStatusCode: code,
 		StatusText:     http.StatusText(code),
 		ErrorText:      err.Error(),
+	}
+}
+
+func getStatusCode(err error) int {
+	if err == nil {
+		return http.StatusOK
+	}
+
+	switch err {
+	case domain.ErrInternalServerError:
+		return http.StatusInternalServerError
+	case domain.ErrBadParams, domain.ErrPasswordTooWeak:
+		return http.StatusBadRequest
+	case domain.ErrLoginExist:
+		return http.StatusConflict
+	case domain.ErrBadUserData:
+		return http.StatusUnauthorized
+	default:
+		return http.StatusInternalServerError
 	}
 }

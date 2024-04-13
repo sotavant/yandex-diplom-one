@@ -23,7 +23,7 @@ func BuildJWTString(userId int64) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExp)),
 		},
 		// собственное утверждение
-		UserId: 1,
+		UserId: userId,
 	})
 
 	// создаём строку токена
@@ -36,7 +36,7 @@ func BuildJWTString(userId int64) (string, error) {
 	return tokenString, nil
 }
 
-func GetUserId(tokenString string) int64 {
+func GetUserId(tokenString string) (int64, error) {
 	claims := &claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {
@@ -47,12 +47,12 @@ func GetUserId(tokenString string) int64 {
 		})
 	if err != nil {
 		internal.Logger.Infow("error in parse token", "err", err)
-		return -1
+		return -1, err
 	}
 
 	if !token.Valid {
-		return -1
+		return -1, nil
 	}
 
-	return claims.UserId
+	return claims.UserId, nil
 }
