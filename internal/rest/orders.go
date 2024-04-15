@@ -1,17 +1,23 @@
 package rest
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/sotavant/yandex-diplom-one/internal"
 	"github.com/sotavant/yandex-diplom-one/internal/rest/middleware"
+	"github.com/sotavant/yandex-diplom-one/order"
+	"io"
 	"net/http"
 )
 
-type OrdersHandler struct{}
+type OrdersHandler struct {
+	Service *order.Service
+}
 
-func NewOrdersHandler(r *chi.Mux) {
-	handler := &OrdersHandler{}
+func NewOrdersHandler(r *chi.Mux, service *order.Service) {
+	handler := &OrdersHandler{
+		Service: service,
+	}
 
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Auth)
@@ -26,7 +32,15 @@ func (o *OrdersHandler) AddOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	fmt.Println("ok")
+
+	textBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		internal.Logger.Infow("error in io.readAll", err, err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	err = o.Service.Add(textBody)
 }
 
 func isTextPlainRequest(r *http.Request) bool {
