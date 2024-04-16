@@ -34,14 +34,16 @@ func getStatusCode(err error) int {
 	}
 
 	switch err {
-	case domain.ErrInternalServerError:
-		return http.StatusInternalServerError
 	case domain.ErrBadParams, domain.ErrPasswordTooWeak:
 		return http.StatusBadRequest
-	case domain.ErrLoginExist:
-		return http.StatusConflict
 	case domain.ErrBadUserData:
 		return http.StatusUnauthorized
+	case domain.ErrLoginExist, domain.ErrOrderAlreadyUploaded:
+		return http.StatusConflict
+	case domain.ErrBadOrderNum:
+		return http.StatusUnprocessableEntity
+	case domain.ErrInternalServerError:
+		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}

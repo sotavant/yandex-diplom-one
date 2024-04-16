@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sotavant/yandex-diplom-one/internal"
@@ -46,6 +47,9 @@ func GetUserId(tokenString string) (int64, error) {
 			return []byte(secretKey), nil
 		})
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenInvalidClaims) {
+			return -1, nil
+		}
 		internal.Logger.Infow("error in parse token", "err", err)
 		return -1, err
 	}

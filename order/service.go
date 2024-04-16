@@ -60,7 +60,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 		return "", domain.ErrInternalServerError
 	}
 
-	return nil
+	return domain.RespOrderAdmitted, nil
 }
 
 func validateOrderNum(orderNum int64) bool {

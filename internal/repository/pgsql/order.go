@@ -25,7 +25,7 @@ func NewOrderRepository(ctx context.Context, pool *pgxpool.Pool) (*OrderReposito
 }
 
 func (o *OrderRepository) GetByNum(ctx context.Context, orderNum int64) (domain.Order, error) {
-	query := setOrderTableName(`select id, user_id from #T# where number = $1`)
+	query := setOrderTableName(`select * from #T# where number = $1`)
 
 	return o.getOne(ctx, query, orderNum)
 }
