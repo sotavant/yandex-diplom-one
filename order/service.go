@@ -16,6 +16,7 @@ type Service struct {
 type OrderRepository interface {
 	Store(ctx context.Context, order domain.Order) (int64, error)
 	GetByNum(ctx context.Context, num int64) (domain.Order, error)
+	FindByUser(ctx context.Context, userId int64) ([]domain.Order, error)
 }
 
 func NewOrderService(o OrderRepository) *Service {
@@ -61,6 +62,20 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 	}
 
 	return domain.RespOrderAdmitted, nil
+}
+
+func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
+	orders, err := s.orderRepo.FindByUser(ctx, ctx.Value(user.ContextUserIdKey).(int64))
+	if err != nil {
+		internal.Logger.Infow("error findByUser orders", "err", err)
+		return orders, "", domain.ErrInternalServerError
+	}
+
+	if len(orders) == 0 {
+		return orders, domain.RespNoDataToResponse, nil
+	}
+
+	return orders, "", nil
 }
 
 func validateOrderNum(orderNum int64) bool {

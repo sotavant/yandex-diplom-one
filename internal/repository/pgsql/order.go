@@ -24,6 +24,24 @@ func NewOrderRepository(ctx context.Context, pool *pgxpool.Pool) (*OrderReposito
 	return &OrderRepository{DBPoll: pool}, nil
 }
 
+func (o *OrderRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Order, error) {
+	var orders []domain.Order
+
+	query := setOrderTableName(`select * from #T# where user_id = $1`)
+
+	rows, err := o.DBPoll.Query(ctx, query, userId)
+	if err != nil {
+		return orders, err
+	}
+
+	orders, err = pgx.CollectRows(rows, pgx.RowToStructByName[domain.Order])
+	if err != nil {
+		return make([]domain.Order, 0), err
+	}
+
+	return orders, nil
+}
+
 func (o *OrderRepository) GetByNum(ctx context.Context, orderNum int64) (domain.Order, error) {
 	query := setOrderTableName(`select * from #T# where number = $1`)
 
