@@ -46,7 +46,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 		return "", domain.ErrInternalServerError
 	}
 
-	if order.ID != 0 {
+	if existedOrder.ID != 0 {
 		if existedOrder.UserId == order.UserId {
 			return domain.RespOrderAlreadyUploaded, nil
 		} else {
