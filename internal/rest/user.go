@@ -46,7 +46,6 @@ func (u *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			internal.Logger.Infoln(err)
 		}
 		return
-
 	}
 
 	var token string

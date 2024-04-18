@@ -35,7 +35,7 @@ func (u *UserRepository) GetById(ctx context.Context, userId int64) (domain.User
 }
 
 func (u *UserRepository) GetByLogin(ctx context.Context, login string) (domain.User, error) {
-	query := setUserTableName(`select id, login, password from #T# where login = $1`)
+	query := setUserTableName(`select id, login, password, current, withdrawn from #T# where login = $1`)
 
 	return u.getOne(ctx, query, login)
 }

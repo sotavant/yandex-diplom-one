@@ -38,6 +38,8 @@ func getStatusCode(err error) int {
 		return http.StatusBadRequest
 	case domain.ErrBadUserData:
 		return http.StatusUnauthorized
+	case domain.ErrNotEnoughCurrent:
+		return http.StatusPaymentRequired
 	case domain.ErrLoginExist, domain.ErrOrderAlreadyUploaded:
 		return http.StatusConflict
 	case domain.ErrBadOrderNum:

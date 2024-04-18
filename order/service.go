@@ -30,7 +30,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 	if err != nil {
 		return "", domain.ErrBadParams
 	}
-	orderValid := validateOrderNum(orderNum)
+	orderValid := ValidateOrderNum(orderNum)
 	if !orderValid {
 		return "", domain.ErrBadOrderNum
 	}
@@ -78,7 +78,7 @@ func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
 	return orders, "", nil
 }
 
-func validateOrderNum(orderNum int64) bool {
+func ValidateOrderNum(orderNum int64) bool {
 	err := goluhn.Validate(strconv.FormatInt(orderNum, 10))
 	if err != nil {
 		return false

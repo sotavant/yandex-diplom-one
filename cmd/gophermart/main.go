@@ -9,6 +9,7 @@ import (
 	"github.com/sotavant/yandex-diplom-one/internal/rest/middleware"
 	"github.com/sotavant/yandex-diplom-one/order"
 	"github.com/sotavant/yandex-diplom-one/user"
+	"github.com/sotavant/yandex-diplom-one/withdrawn"
 	"net/http"
 )
 
@@ -32,12 +33,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	wdRepo, err := pgsql.NewWithdrawnRepository(ctx, app.DBPool)
+	if err != nil {
+		panic(err)
+	}
 
 	userService := user.NewService(userRepo)
 	orderService := order.NewOrderService(ordersRepo)
+	wdService := withdrawn.NewService(wdRepo, userRepo)
 
 	rest.NewUserHandler(r, userService)
 	rest.NewOrdersHandler(r, orderService)
+	rest.NewWithdrawnHandler(r, wdService)
 
 	err = http.ListenAndServe(app.Address, r)
 	if err != nil {

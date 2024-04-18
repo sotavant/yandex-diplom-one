@@ -12,4 +12,5 @@ var (
 	ErrOrderAlreadyUploaded = errors.New("order uploaded by another user")
 	ErrUserNotFound         = errors.New("user not found")
 	ErrUserNotAuthorized    = errors.New("user not authorized")
+	ErrNotEnoughCurrent     = errors.New("not enough current")
 )
