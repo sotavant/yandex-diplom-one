@@ -27,7 +27,7 @@ func NewOrderRepository(ctx context.Context, pool *pgxpool.Pool) (*OrderReposito
 func (o *OrderRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Order, error) {
 	var orders []domain.Order
 
-	query := setOrderTableName(`select * from #T# where user_id = $1`)
+	query := setOrderTableName(`select * from #T# where user_id = $1 order by uploaded_at asc`)
 
 	rows, err := o.DBPoll.Query(ctx, query, userId)
 	if err != nil {

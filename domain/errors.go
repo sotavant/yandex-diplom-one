@@ -10,4 +10,6 @@ var (
 	ErrBadUserData          = errors.New("wrong login/password")
 	ErrBadOrderNum          = errors.New("bad order number")
 	ErrOrderAlreadyUploaded = errors.New("order uploaded by another user")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrUserNotAuthorized    = errors.New("user not authorized")
 )

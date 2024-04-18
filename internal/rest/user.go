@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/sotavant/yandex-diplom-one/domain"
 	"github.com/sotavant/yandex-diplom-one/internal"
+	"github.com/sotavant/yandex-diplom-one/internal/rest/middleware"
 	"github.com/sotavant/yandex-diplom-one/user"
 	"net/http"
 	"strings"
@@ -31,6 +32,7 @@ func NewUserHandler(r *chi.Mux, service *user.Service) {
 		r.Route("/api/user", func(r chi.Router) {
 			r.Post(fmt.Sprintf("/%s", registerURI), handler.Auth)
 			r.Post(fmt.Sprintf("/%s", loginURI), handler.Auth)
+			r.With(middleware.Auth).Get("/balance", handler.GetBalance)
 		})
 	})
 }
@@ -74,6 +76,34 @@ func (u *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (u *UserHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(user.ContextUserIdKey).(int64)
+	if userId == 0 {
+		err := render.Render(w, r, errorRender(getStatusCode(domain.ErrUserNotAuthorized), domain.ErrUserNotAuthorized))
+		if err != nil {
+			render.Status(r, http.StatusInternalServerError)
+			internal.Logger.Infoln(err)
+		}
+		return
+	}
+
+	dbUser, err := u.Service.GetById(r.Context(), userId)
+	if err != nil {
+		err = render.Render(w, r, errorRender(getStatusCode(err), err))
+		if err != nil {
+			render.Status(r, http.StatusInternalServerError)
+			internal.Logger.Infoln(err)
+		}
+		return
+	}
+
+	if err = render.Render(w, r, newUserBalanceResponse(&dbUser)); err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		internal.Logger.Infoln(err)
+		return
+	}
+}
+
 type userRequest struct {
 	*domain.User
 }
@@ -101,6 +131,23 @@ func newTokenResponse(token string) *tokenResponse {
 }
 
 func (t *tokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+type userBalanceResponse struct {
+	*domain.User
+}
+
+func newUserBalanceResponse(user *domain.User) *userBalanceResponse {
+	resp := &userBalanceResponse{user}
+
+	return resp
+}
+
+func (ub *userBalanceResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	ub.Login = ""
+	ub.Password = ""
+
 	return nil
 }
 

@@ -20,12 +20,27 @@ type Service struct {
 type UserRepository interface {
 	GetByLogin(ctx context.Context, login string) (domain.User, error)
 	Store(ctx context.Context, user domain.User) (int64, error)
+	GetById(ctx context.Context, userId int64) (domain.User, error)
 }
 
 func NewService(u UserRepository) *Service {
 	return &Service{
 		userRepo: u,
 	}
+}
+
+func (u *Service) GetById(ctx context.Context, userId int64) (domain.User, error) {
+	dbUser, err := u.userRepo.GetById(ctx, userId)
+	if err != nil {
+		internal.Logger.Infow("error in get by id", "err", err)
+		return domain.User{}, domain.ErrInternalServerError
+	}
+
+	if dbUser.ID == 0 {
+		return domain.User{}, domain.ErrBadUserData
+	}
+
+	return dbUser, nil
 }
 
 func (u *Service) Register(ctx context.Context, user domain.User) (string, error) {

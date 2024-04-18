@@ -34,7 +34,7 @@ func getStatusCode(err error) int {
 	}
 
 	switch err {
-	case domain.ErrBadParams, domain.ErrPasswordTooWeak:
+	case domain.ErrBadParams, domain.ErrPasswordTooWeak, domain.ErrUserNotFound:
 		return http.StatusBadRequest
 	case domain.ErrBadUserData:
 		return http.StatusUnauthorized

@@ -16,12 +16,22 @@ type UserRepository struct {
 
 func NewUserRepository(ctx context.Context, pool *pgxpool.Pool) (*UserRepository, error) {
 	err := createUsersTable(ctx, pool)
+	if err != nil {
+		return nil, err
+	}
 
+	err = addColumns(ctx, pool)
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserRepository{DBPoll: pool}, nil
+}
+
+func (u *UserRepository) GetById(ctx context.Context, userId int64) (domain.User, error) {
+	query := setUserTableName(`select id, login, password, current, withdrawn from #T# where id = $1`)
+
+	return u.getOne(ctx, query, userId)
 }
 
 func (u *UserRepository) GetByLogin(ctx context.Context, login string) (domain.User, error) {
@@ -67,6 +77,17 @@ func createUsersTable(ctx context.Context, pool *pgxpool.Pool) error {
 			login  varchar not null,
 			password varchar not null
 		);`, "#T#", usersTableName)
+
+	_, err := pool.Exec(ctx, query)
+
+	return err
+}
+
+func addColumns(ctx context.Context, pool *pgxpool.Pool) error {
+	query := strings.ReplaceAll(`
+		alter table #T# add column if not exists current float8 default 0;
+		alter table #T# add column if not exists withdrawn float8 default 0;
+	`, "#T#", usersTableName)
 
 	_, err := pool.Exec(ctx, query)
 
