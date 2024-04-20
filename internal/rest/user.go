@@ -68,6 +68,7 @@ func (u *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Authorization", "Bearer "+token)
 	if err = render.Render(w, r, newTokenResponse(token)); err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		internal.Logger.Infoln(err)
