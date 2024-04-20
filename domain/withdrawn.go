@@ -7,10 +7,10 @@ import (
 
 type Withdrawn struct {
 	ID          int64     `json:"-"`
-	OrderNum    int64     `json:"order,omitempty"`
+	OrderNum    string    `json:"order,omitempty"`
 	UserId      int64     `json:"-"`
 	Sum         float64   `json:"sum,omitempty"`
-	ProcessedAt time.Time `json:"uploaded_at"`
+	ProcessedAt time.Time `json:"processed_at"`
 }
 
 func (o *Withdrawn) MarshalJSON() ([]byte, error) {

@@ -42,7 +42,7 @@ func (o *OrderRepository) FindByUser(ctx context.Context, userId int64) ([]domai
 	return orders, nil
 }
 
-func (o *OrderRepository) GetByNum(ctx context.Context, orderNum int64) (domain.Order, error) {
+func (o *OrderRepository) GetByNum(ctx context.Context, orderNum string) (domain.Order, error) {
 	query := setOrderTableName(`select * from #T# where number = $1`)
 
 	return o.getOne(ctx, query, orderNum)
@@ -84,7 +84,7 @@ func createOrdersTable(ctx context.Context, pool *pgxpool.Pool) error {
 			id          serial
 				constraint orders_pk
 					primary key,
-			number      bigint                  not null
+			number      varchar                  not null
 				constraint orders_uq
 					unique,
 			user_id     bigint                  not null

@@ -24,17 +24,40 @@ func NewWithdrawnRepository(ctx context.Context, pool *pgxpool.Pool) (*Withdrawn
 	return &WithdrawnRepository{DBPoll: pool}, nil
 }
 
+func (o *WithdrawnRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Withdrawn, error) {
+	var wds []domain.Withdrawn
+
+	query := setWithdrawnTableName(`select * from #T# where user_id = $1 order by processed_at asc`)
+
+	rows, err := o.DBPoll.Query(ctx, query, userId)
+	if err != nil {
+		return wds, err
+	}
+
+	wds, err = pgx.CollectRows(rows, pgx.RowToStructByName[domain.Withdrawn])
+	if err != nil {
+		return make([]domain.Withdrawn, 0), err
+	}
+
+	return wds, nil
+}
+
+func (wd *WithdrawnRepository) FindOne(ctx context.Context, orderNum string) (domain.Withdrawn, error) {
+	query := setWithdrawnTableName(`select * from #T# where order_num = $1`)
+
+	return wd.getOne(ctx, query, orderNum)
+}
+
 func (wd *WithdrawnRepository) Store(ctx context.Context, withdrawn domain.Withdrawn) error {
 	tx, err := wd.DBPoll.Begin(ctx)
-	defer func(ctx context.Context, tx pgx.Tx) {
+	defer func(tx pgx.Tx, ctx context.Context) {
 		err = tx.Rollback(ctx)
 		if err != nil {
-			internal.Logger.Infow("error in transaction", "err", err)
-			panic(err)
+			internal.Logger.Infow("error in close transaction", "err", err)
 		}
-	}(ctx, tx)
+	}(tx, ctx)
 
-	query := setWithdrawnTableName(`insert into #T# (order, user_id, sum) values ($1, $2, $3)`)
+	query := setWithdrawnTableName(`insert into #T# (order_num, user_id, sum) values ($1, $2, $3)`)
 	userQuery := setUserTableName(`update #T# 
 		set withdrawn = withdrawn + $1,
 			current = withdrawn - $2
@@ -60,7 +83,7 @@ func createWithdrawnTable(ctx context.Context, pool *pgxpool.Pool) error {
 			id          serial
 				constraint withdrawn_pk
 					primary key,
-			order_num      bigint                  not null
+			order_num      varchar                  not null
 				constraint withdrawn_uq
 					unique,
 			user_id     bigint                  not null
@@ -77,4 +100,22 @@ func createWithdrawnTable(ctx context.Context, pool *pgxpool.Pool) error {
 
 func setWithdrawnTableName(query string) string {
 	return strings.ReplaceAll(query, "#T#", withdrawnTableName)
+}
+
+func (o *WithdrawnRepository) getOne(ctx context.Context, query string, args ...interface{}) (wd domain.Withdrawn, err error) {
+	rows, err := o.DBPoll.Query(ctx, query, args...)
+	if err != nil {
+		return
+	}
+
+	wds, err := pgx.CollectRows(rows, pgx.RowToStructByName[domain.Withdrawn])
+	if err != nil {
+		return
+	}
+
+	for _, wd = range wds {
+		return
+	}
+
+	return
 }

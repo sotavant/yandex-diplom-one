@@ -3,6 +3,7 @@ package withdrawn
 import (
 	"context"
 	"github.com/sotavant/yandex-diplom-one/domain"
+	"github.com/sotavant/yandex-diplom-one/internal"
 	"github.com/sotavant/yandex-diplom-one/order"
 	"github.com/sotavant/yandex-diplom-one/user"
 )
@@ -14,6 +15,8 @@ type Service struct {
 
 type WithdrawnRepository interface {
 	Store(ctx context.Context, withdrawn domain.Withdrawn) error
+	FindOne(ctx context.Context, orderNum string) (domain.Withdrawn, error)
+	FindByUser(ctx context.Context, userId int64) ([]domain.Withdrawn, error)
 }
 
 func NewService(wd WithdrawnRepository, ur user.UserRepository) *Service {
@@ -29,9 +32,17 @@ func (s *Service) Add(ctx context.Context, wd *domain.Withdrawn) error {
 		return domain.ErrBadOrderNum
 	}
 
-	bdUser, err := s.userRepo.GetById(ctx, wd.UserId)
+	dbWd, err := s.wdRepo.FindOne(ctx, wd.OrderNum)
 	if err != nil {
 		return domain.ErrInternalServerError
+	}
+	if dbWd.ID > 0 {
+		return domain.ErrOrderAlreadyUploaded
+	}
+
+	bdUser, err := s.userRepo.GetById(ctx, wd.UserId)
+	if err != nil {
+		return domain.ErrUserNotAuthorized
 	}
 
 	if bdUser.Current < wd.Sum {
@@ -44,4 +55,18 @@ func (s *Service) Add(ctx context.Context, wd *domain.Withdrawn) error {
 	}
 
 	return nil
+}
+
+func (s *Service) List(ctx context.Context, userId int64) ([]domain.Withdrawn, string, error) {
+	wds, err := s.wdRepo.FindByUser(ctx, userId)
+	if err != nil {
+		internal.Logger.Infow("error findByUser wds", "err", err)
+		return wds, "", domain.ErrInternalServerError
+	}
+
+	if len(wds) == 0 {
+		return wds, domain.RespNoDataToResponse, nil
+	}
+
+	return wds, "", nil
 }

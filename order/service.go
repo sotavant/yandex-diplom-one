@@ -6,7 +6,6 @@ import (
 	"github.com/sotavant/yandex-diplom-one/domain"
 	"github.com/sotavant/yandex-diplom-one/internal"
 	"github.com/sotavant/yandex-diplom-one/user"
-	"strconv"
 )
 
 type Service struct {
@@ -15,7 +14,7 @@ type Service struct {
 
 type OrderRepository interface {
 	Store(ctx context.Context, order domain.Order) (int64, error)
-	GetByNum(ctx context.Context, num int64) (domain.Order, error)
+	GetByNum(ctx context.Context, num string) (domain.Order, error)
 	FindByUser(ctx context.Context, userId int64) ([]domain.Order, error)
 }
 
@@ -26,10 +25,7 @@ func NewOrderService(o OrderRepository) *Service {
 }
 
 func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
-	orderNum, err := strconv.ParseInt(string(orderNumber), 10, 64)
-	if err != nil {
-		return "", domain.ErrBadParams
-	}
+	orderNum := string(orderNumber)
 	orderValid := ValidateOrderNum(orderNum)
 	if !orderValid {
 		return "", domain.ErrBadOrderNum
@@ -78,8 +74,8 @@ func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
 	return orders, "", nil
 }
 
-func ValidateOrderNum(orderNum int64) bool {
-	err := goluhn.Validate(strconv.FormatInt(orderNum, 10))
+func ValidateOrderNum(orderNum string) bool {
+	err := goluhn.Validate(orderNum)
 	if err != nil {
 		return false
 	}
