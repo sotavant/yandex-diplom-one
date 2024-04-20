@@ -37,11 +37,11 @@ func (s *Service) UpdateOrderState(ctx context.Context, dbOrder domain.Order, ac
 	dbOrder.Status = accrual.Status
 	dbOrder.Accrual = &accrual.Accrual
 
-	if dbOrder.Number != accrual.Order || accrual.Status == order.STATUS_REGISTERED {
+	if dbOrder.Number != accrual.Order || accrual.Status == order.StatusRegistered {
 		return nil
 	}
 
-	if dbOrder.Status != order.STATUS_PROCESSED || accrual.Accrual <= 0 {
+	if dbOrder.Status != order.StatusProcessed || accrual.Accrual <= 0 {
 		err := s.ordersRepo.UpdateStatus(ctx, dbOrder)
 		if err != nil {
 			internal.Logger.Infow("error in update order status", "err", err)

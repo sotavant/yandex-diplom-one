@@ -15,7 +15,7 @@ type Service struct {
 type OrderRepository interface {
 	Store(ctx context.Context, order domain.Order) (int64, error)
 	GetByNum(ctx context.Context, num string) (domain.Order, error)
-	FindByUser(ctx context.Context, userId int64) ([]domain.Order, error)
+	FindByUser(ctx context.Context, userID int64) ([]domain.Order, error)
 }
 
 func NewOrderService(o OrderRepository) *Service {
@@ -33,8 +33,8 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 
 	order := domain.Order{
 		Number: orderNum,
-		UserId: ctx.Value(user.ContextUserIdKey{}).(int64),
-		Status: STATUS_NEW,
+		UserID: ctx.Value(user.ContextUserIDKey{}).(int64),
+		Status: StatusNew,
 	}
 
 	existedOrder, err := s.orderRepo.GetByNum(ctx, orderNum)
@@ -44,7 +44,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 	}
 
 	if existedOrder.ID != 0 {
-		if existedOrder.UserId == order.UserId {
+		if existedOrder.UserID == order.UserID {
 			return domain.RespOrderAlreadyUploaded, nil
 		} else {
 			return "", domain.ErrOrderAlreadyUploaded
@@ -61,7 +61,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 }
 
 func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
-	orders, err := s.orderRepo.FindByUser(ctx, ctx.Value(user.ContextUserIdKey{}).(int64))
+	orders, err := s.orderRepo.FindByUser(ctx, ctx.Value(user.ContextUserIDKey{}).(int64))
 	if err != nil {
 		internal.Logger.Infow("error findByUser orders", "err", err)
 		return orders, "", domain.ErrInternalServerError

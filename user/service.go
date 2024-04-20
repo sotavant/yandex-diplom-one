@@ -12,7 +12,7 @@ import (
 
 const passwordMinLength = 6
 
-type ContextUserIdKey struct{}
+type ContextUserIDKey struct{}
 
 type Service struct {
 	userRepo UserRepository
@@ -21,7 +21,7 @@ type Service struct {
 type UserRepository interface {
 	GetByLogin(ctx context.Context, login string) (domain.User, error)
 	Store(ctx context.Context, user domain.User) (int64, error)
-	GetById(ctx context.Context, userId int64) (domain.User, error)
+	GetByID(ctx context.Context, userID int64) (domain.User, error)
 }
 
 func NewService(u UserRepository) *Service {
@@ -30,8 +30,8 @@ func NewService(u UserRepository) *Service {
 	}
 }
 
-func (u *Service) GetById(ctx context.Context, userId int64) (domain.User, error) {
-	dbUser, err := u.userRepo.GetById(ctx, userId)
+func (u *Service) GetByID(ctx context.Context, userID int64) (domain.User, error) {
+	dbUser, err := u.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		internal.Logger.Infow("error in get by id", "err", err)
 		return domain.User{}, domain.ErrInternalServerError
@@ -65,13 +65,13 @@ func (u *Service) Register(ctx context.Context, user domain.User) (string, error
 		return "", domain.ErrInternalServerError
 	}
 
-	userId, err := u.userRepo.Store(ctx, user)
+	userID, err := u.userRepo.Store(ctx, user)
 	if err != nil {
 		internal.Logger.Infow("error save user", "err", err)
 		return "", domain.ErrInternalServerError
 	}
 
-	token, err := auth.BuildJWTString(userId)
+	token, err := auth.BuildJWTString(userID)
 	if err != nil {
 		internal.Logger.Infow("error generation token", "err", err)
 		return "", domain.ErrInternalServerError

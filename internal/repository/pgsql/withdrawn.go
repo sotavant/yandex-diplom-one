@@ -24,12 +24,12 @@ func NewWithdrawnRepository(ctx context.Context, pool *pgxpool.Pool) (*Withdrawn
 	return &WithdrawnRepository{DBPoll: pool}, nil
 }
 
-func (o *WithdrawnRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Withdrawn, error) {
+func (wd *WithdrawnRepository) FindByUser(ctx context.Context, userID int64) ([]domain.Withdrawn, error) {
 	var wds []domain.Withdrawn
 
 	query := setWithdrawnTableName(`select * from #T# where user_id = $1 order by processed_at asc`)
 
-	rows, err := o.DBPoll.Query(ctx, query, userId)
+	rows, err := wd.DBPoll.Query(ctx, query, userID)
 	if err != nil {
 		return wds, err
 	}
@@ -64,12 +64,12 @@ func (wd *WithdrawnRepository) Store(ctx context.Context, withdrawn domain.Withd
 		where id = $3
 	`)
 
-	_, err = wd.DBPoll.Query(ctx, query, withdrawn.OrderNum, withdrawn.UserId, withdrawn.Sum)
+	_, err = wd.DBPoll.Query(ctx, query, withdrawn.OrderNum, withdrawn.UserID, withdrawn.Sum)
 	if err != nil {
 		return err
 	}
 
-	_, err = wd.DBPoll.Query(ctx, userQuery, withdrawn.Sum, withdrawn.Sum, withdrawn.UserId)
+	_, err = wd.DBPoll.Query(ctx, userQuery, withdrawn.Sum, withdrawn.Sum, withdrawn.UserID)
 	if err != nil {
 		return err
 	}
@@ -102,8 +102,8 @@ func setWithdrawnTableName(query string) string {
 	return strings.ReplaceAll(query, "#T#", withdrawnTableName)
 }
 
-func (o *WithdrawnRepository) getOne(ctx context.Context, query string, args ...interface{}) (wd domain.Withdrawn, err error) {
-	rows, err := o.DBPoll.Query(ctx, query, args...)
+func (wd *WithdrawnRepository) getOne(ctx context.Context, query string, args ...interface{}) (wdres domain.Withdrawn, err error) {
+	rows, err := wd.DBPoll.Query(ctx, query, args...)
 	if err != nil {
 		return
 	}
@@ -113,7 +113,7 @@ func (o *WithdrawnRepository) getOne(ctx context.Context, query string, args ...
 		return
 	}
 
-	for _, wd = range wds {
+	for _, wdres = range wds {
 		return
 	}
 

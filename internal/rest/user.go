@@ -76,8 +76,8 @@ func (u *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value(user.ContextUserIdKey{}).(int64)
-	if userId == 0 {
+	userID := r.Context().Value(user.ContextUserIDKey{}).(int64)
+	if userID == 0 {
 		err := render.Render(w, r, errorRender(getStatusCode(domain.ErrUserNotAuthorized), domain.ErrUserNotAuthorized))
 		if err != nil {
 			render.Status(r, http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (u *UserHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbUser, err := u.Service.GetById(r.Context(), userId)
+	dbUser, err := u.Service.GetByID(r.Context(), userID)
 	if err != nil {
 		err = render.Render(w, r, errorRender(getStatusCode(err), err))
 		if err != nil {

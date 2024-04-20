@@ -16,7 +16,7 @@ type Service struct {
 type WithdrawnRepository interface {
 	Store(ctx context.Context, withdrawn domain.Withdrawn) error
 	FindOne(ctx context.Context, orderNum string) (domain.Withdrawn, error)
-	FindByUser(ctx context.Context, userId int64) ([]domain.Withdrawn, error)
+	FindByUser(ctx context.Context, userID int64) ([]domain.Withdrawn, error)
 }
 
 func NewService(wd WithdrawnRepository, ur user.UserRepository) *Service {
@@ -40,7 +40,7 @@ func (s *Service) Add(ctx context.Context, wd *domain.Withdrawn) error {
 		return domain.ErrOrderAlreadyUploaded
 	}
 
-	bdUser, err := s.userRepo.GetById(ctx, wd.UserId)
+	bdUser, err := s.userRepo.GetByID(ctx, wd.UserID)
 	if err != nil {
 		return domain.ErrUserNotAuthorized
 	}
@@ -57,8 +57,8 @@ func (s *Service) Add(ctx context.Context, wd *domain.Withdrawn) error {
 	return nil
 }
 
-func (s *Service) List(ctx context.Context, userId int64) ([]domain.Withdrawn, string, error) {
-	wds, err := s.wdRepo.FindByUser(ctx, userId)
+func (s *Service) List(ctx context.Context, userID int64) ([]domain.Withdrawn, string, error) {
+	wds, err := s.wdRepo.FindByUser(ctx, userID)
 	if err != nil {
 		internal.Logger.Infow("error findByUser wds", "err", err)
 		return wds, "", domain.ErrInternalServerError

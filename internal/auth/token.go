@@ -10,13 +10,13 @@ import (
 
 type claims struct {
 	jwt.RegisteredClaims
-	UserId int64
+	UserID int64
 }
 
 const tokenExp = time.Hour * 3
 const secretKey = "someSecretSuperKey"
 
-func BuildJWTString(userId int64) (string, error) {
+func BuildJWTString(userID int64) (string, error) {
 	// создаём новый токен с алгоритмом подписи HS256 и утверждениями — Claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -24,7 +24,7 @@ func BuildJWTString(userId int64) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExp)),
 		},
 		// собственное утверждение
-		UserId: userId,
+		UserID: userID,
 	})
 
 	// создаём строку токена
@@ -37,7 +37,7 @@ func BuildJWTString(userId int64) (string, error) {
 	return tokenString, nil
 }
 
-func GetUserId(tokenString string) (int64, error) {
+func GetUserID(tokenString string) (int64, error) {
 	claims := &claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {
@@ -58,5 +58,5 @@ func GetUserId(tokenString string) (int64, error) {
 		return -1, nil
 	}
 
-	return claims.UserId, nil
+	return claims.UserID, nil
 }

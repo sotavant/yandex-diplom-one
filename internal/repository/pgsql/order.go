@@ -43,12 +43,12 @@ func (o *OrderRepository) FindByStatus(ctx context.Context, states []string) ([]
 	return orders, nil
 }
 
-func (o *OrderRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Order, error) {
+func (o *OrderRepository) FindByUser(ctx context.Context, userID int64) ([]domain.Order, error) {
 	var orders []domain.Order
 
 	query := setOrderTableName(`select * from #T# where user_id = $1 order by uploaded_at asc`)
 
-	rows, err := o.DBPoll.Query(ctx, query, userId)
+	rows, err := o.DBPoll.Query(ctx, query, userID)
 	if err != nil {
 		return orders, err
 	}
@@ -90,7 +90,7 @@ func (o *OrderRepository) SetAccrual(ctx context.Context, order domain.Order) er
 		return err
 	}
 
-	_, err = o.DBPoll.Exec(ctx, userQuery, order.Accrual, order.UserId)
+	_, err = o.DBPoll.Exec(ctx, userQuery, order.Accrual, order.UserID)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (o *OrderRepository) Store(ctx context.Context, order domain.Order) (int64,
 	var id int64
 	query := setOrderTableName(`insert into #T# (number, user_id, status) values ($1, $2, $3) returning id`)
 
-	err := o.DBPoll.QueryRow(ctx, query, order.Number, order.UserId, order.Status).Scan(&id)
+	err := o.DBPoll.QueryRow(ctx, query, order.Number, order.UserID, order.Status).Scan(&id)
 	if err != nil {
 		return id, err
 	}

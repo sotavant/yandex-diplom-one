@@ -27,18 +27,18 @@ func Auth(h http.Handler) http.Handler {
 		}
 
 		token := strings.TrimSpace(strings.Replace(authHeader, tokenSubstr, "", -1))
-		userId, err := auth.GetUserId(token)
+		userID, err := auth.GetUserID(token)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if userId == -1 {
+		if userID == -1 {
 			authFailed(w)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), user.ContextUserIdKey{}, userId)
+		ctx := context.WithValue(r.Context(), user.ContextUserIDKey{}, userID)
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	}

@@ -28,10 +28,10 @@ func NewUserRepository(ctx context.Context, pool *pgxpool.Pool) (*UserRepository
 	return &UserRepository{DBPoll: pool}, nil
 }
 
-func (u *UserRepository) GetById(ctx context.Context, userId int64) (domain.User, error) {
+func (u *UserRepository) GetByID(ctx context.Context, userID int64) (domain.User, error) {
 	query := setUserTableName(`select id, login, password, current, withdrawn from #T# where id = $1`)
 
-	return u.getOne(ctx, query, userId)
+	return u.getOne(ctx, query, userID)
 }
 
 func (u *UserRepository) GetByLogin(ctx context.Context, login string) (domain.User, error) {
