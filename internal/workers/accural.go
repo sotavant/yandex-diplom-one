@@ -72,7 +72,7 @@ func (a *AccrualWorker) GetOrderInfo(order domain.Order) (domain.OrderAccrual, e
 	resp, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetResult(&resOrder).
-		Get("http://" + a.AccrualAddress + accrualURI + order.Number)
+		Get(a.AccrualAddress + accrualURI + order.Number)
 
 	if err != nil {
 		internal.Logger.Infow("get accrual info error", "err", err)
