@@ -60,7 +60,7 @@ func (wd *WithdrawnRepository) Store(ctx context.Context, withdrawn domain.Withd
 	query := setWithdrawnTableName(`insert into #T# (order_num, user_id, sum) values ($1, $2, $3)`)
 	userQuery := setUserTableName(`update #T# 
 		set withdrawn = withdrawn + $1,
-			current = withdrawn - $2
+			current = current - $2
 		where id = $3
 	`)
 

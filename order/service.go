@@ -33,7 +33,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 
 	order := domain.Order{
 		Number: orderNum,
-		UserId: ctx.Value(user.ContextUserIdKey).(int64),
+		UserId: ctx.Value(user.ContextUserIdKey{}).(int64),
 		Status: STATUS_NEW,
 	}
 
@@ -61,7 +61,7 @@ func (s *Service) Add(ctx context.Context, orderNumber []byte) (string, error) {
 }
 
 func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
-	orders, err := s.orderRepo.FindByUser(ctx, ctx.Value(user.ContextUserIdKey).(int64))
+	orders, err := s.orderRepo.FindByUser(ctx, ctx.Value(user.ContextUserIdKey{}).(int64))
 	if err != nil {
 		internal.Logger.Infow("error findByUser orders", "err", err)
 		return orders, "", domain.ErrInternalServerError
@@ -75,10 +75,5 @@ func (s *Service) List(ctx context.Context) ([]domain.Order, string, error) {
 }
 
 func ValidateOrderNum(orderNum string) bool {
-	err := goluhn.Validate(orderNum)
-	if err != nil {
-		return false
-	}
-
-	return true
+	return goluhn.Validate(orderNum) == nil
 }

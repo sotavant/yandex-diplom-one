@@ -48,7 +48,7 @@ func (wd *WithdrawnHandler) Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Context().Value(user.ContextUserIdKey).(int64)
+	userId := r.Context().Value(user.ContextUserIdKey{}).(int64)
 	if userId == 0 {
 		err := render.Render(w, r, errorRender(getStatusCode(domain.ErrUserNotAuthorized), domain.ErrUserNotAuthorized))
 		if err != nil {
@@ -68,11 +68,10 @@ func (wd *WithdrawnHandler) Add(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	return
 }
 
 func (wd *WithdrawnHandler) List(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value(user.ContextUserIdKey).(int64)
+	userId := r.Context().Value(user.ContextUserIdKey{}).(int64)
 	if userId == 0 {
 		err := render.Render(w, r, errorRender(getStatusCode(domain.ErrUserNotAuthorized), domain.ErrUserNotAuthorized))
 		if err != nil {

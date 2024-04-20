@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sotavant/yandex-diplom-one/domain"
+	"github.com/sotavant/yandex-diplom-one/internal"
 	"strings"
 )
 
@@ -22,6 +23,24 @@ func NewOrderRepository(ctx context.Context, pool *pgxpool.Pool) (*OrderReposito
 	}
 
 	return &OrderRepository{DBPoll: pool}, nil
+}
+
+func (o *OrderRepository) FindByStatus(ctx context.Context, states []string) ([]domain.Order, error) {
+	var orders []domain.Order
+
+	query := setOrderTableName(`select * from #T# where status = any($1)`)
+
+	rows, err := o.DBPoll.Query(ctx, query, states)
+	if err != nil {
+		return orders, err
+	}
+
+	orders, err = pgx.CollectRows(rows, pgx.RowToStructByName[domain.Order])
+	if err != nil {
+		return make([]domain.Order, 0), err
+	}
+
+	return orders, nil
 }
 
 func (o *OrderRepository) FindByUser(ctx context.Context, userId int64) ([]domain.Order, error) {
@@ -48,6 +67,37 @@ func (o *OrderRepository) GetByNum(ctx context.Context, orderNum string) (domain
 	return o.getOne(ctx, query, orderNum)
 }
 
+func (o *OrderRepository) SetAccrual(ctx context.Context, order domain.Order) error {
+	tx, err := o.DBPoll.Begin(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		err = tx.Rollback(ctx)
+		if err != nil {
+			internal.Logger.Infow("error in close transaction", "err", err)
+		}
+	}(tx, ctx)
+
+	query := setOrderTableName(`update #T# 
+		set status = $1,
+		 	accrual = $2
+	where id = $3`)
+
+	userQuery := setUserTableName(`update #T#
+		set current = current + $1
+	where id = $2`)
+
+	_, err = o.DBPoll.Exec(ctx, query, order.Status, order.Accrual, order.ID)
+	if err != nil {
+		return err
+	}
+
+	_, err = o.DBPoll.Exec(ctx, userQuery, order.Accrual, order.UserId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
 func (o *OrderRepository) Store(ctx context.Context, order domain.Order) (int64, error) {
 	var id int64
 	query := setOrderTableName(`insert into #T# (number, user_id, status) values ($1, $2, $3) returning id`)
@@ -58,6 +108,14 @@ func (o *OrderRepository) Store(ctx context.Context, order domain.Order) (int64,
 	}
 
 	return id, nil
+}
+
+func (o *OrderRepository) UpdateStatus(ctx context.Context, order domain.Order) error {
+	query := setOrderTableName("update #T# set status = $1 where id = $2")
+
+	_, err := o.DBPoll.Exec(ctx, query, order.Status, order.ID)
+
+	return err
 }
 
 func (o *OrderRepository) getOne(ctx context.Context, query string, args ...interface{}) (order domain.Order, err error) {
@@ -91,7 +149,7 @@ func createOrdersTable(ctx context.Context, pool *pgxpool.Pool) error {
 				constraint orders_users_id_fk
 					references public.users,
 			status      varchar                 not null,
-			accrual     bigint,
+			accrual     float8,
 			uploaded_at timestamp default now() not null
 		);`, "#T#", ordersTableName)
 

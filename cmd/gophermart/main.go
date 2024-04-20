@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"github.com/go-chi/chi/v5"
+	"github.com/sotavant/yandex-diplom-one/accrual"
 	"github.com/sotavant/yandex-diplom-one/internal"
 	"github.com/sotavant/yandex-diplom-one/internal/repository/pgsql"
 	"github.com/sotavant/yandex-diplom-one/internal/rest"
 	"github.com/sotavant/yandex-diplom-one/internal/rest/middleware"
+	"github.com/sotavant/yandex-diplom-one/internal/workers"
 	"github.com/sotavant/yandex-diplom-one/order"
 	"github.com/sotavant/yandex-diplom-one/user"
 	"github.com/sotavant/yandex-diplom-one/withdrawn"
@@ -41,10 +43,14 @@ func main() {
 	userService := user.NewService(userRepo)
 	orderService := order.NewOrderService(ordersRepo)
 	wdService := withdrawn.NewService(wdRepo, userRepo)
+	accrualService := accrual.NewAccrualService(ordersRepo)
 
 	rest.NewUserHandler(r, userService)
 	rest.NewOrdersHandler(r, orderService)
 	rest.NewWithdrawnHandler(r, wdService)
+
+	worker := workers.NewAccrualWorker(accrualService, app.AccrualSysAddress)
+	worker.Run(ctx)
 
 	err = http.ListenAndServe(app.Address, r)
 	if err != nil {

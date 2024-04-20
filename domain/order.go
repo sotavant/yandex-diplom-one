@@ -10,7 +10,7 @@ type Order struct {
 	Number     string    `json:"number,omitempty"`
 	UserId     int64     `json:"-"`
 	Status     string    `json:"status,omitempty"`
-	Accrual    *int64    `json:"accrual,omitempty"`
+	Accrual    *float64  `json:"accrual,omitempty"`
 	UploadedAt time.Time `json:"uploaded_at"`
 }
 

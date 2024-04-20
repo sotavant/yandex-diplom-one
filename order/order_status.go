@@ -5,4 +5,9 @@ const (
 	STATUS_PROCESSING = "PROCESSING"
 	STATUS_INVALID    = "INVALID"
 	STATUS_PROCESSED  = "PROCESSED"
+	STATUS_REGISTERED = "REGISTERED"
 )
+
+func GetNotProcessedStates() []string {
+	return []string{STATUS_NEW, STATUS_PROCESSING}
+}
