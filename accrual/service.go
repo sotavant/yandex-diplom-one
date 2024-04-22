@@ -54,7 +54,8 @@ func (s *Service) UpdateOrderState(ctx context.Context, dbOrder domain.Order, ac
 	err := s.ordersRepo.SetAccrual(ctx, dbOrder)
 	if err != nil {
 		internal.Logger.Infow("error in set accrual status", "err", err)
+		return err
 	}
 
-	return err
+	return nil
 }

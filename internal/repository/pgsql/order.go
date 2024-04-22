@@ -85,12 +85,12 @@ func (o *OrderRepository) SetAccrual(ctx context.Context, order domain.Order) er
 		set current = current + $1
 	where id = $2`)
 
-	_, err = o.DBPoll.Exec(ctx, query, order.Status, order.Accrual, order.ID)
+	_, err = tx.Exec(ctx, query, order.Status, order.Accrual, order.ID)
 	if err != nil {
 		return err
 	}
 
-	_, err = o.DBPoll.Exec(ctx, userQuery, order.Accrual, order.UserID)
+	_, err = tx.Exec(ctx, userQuery, order.Accrual, order.UserID)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,11 @@ func (o *OrderRepository) UpdateStatus(ctx context.Context, order domain.Order) 
 
 	_, err := o.DBPoll.Exec(ctx, query, order.Status, order.ID)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (o *OrderRepository) getOne(ctx context.Context, query string, args ...interface{}) (order domain.Order, err error) {
@@ -155,7 +159,10 @@ func createOrdersTable(ctx context.Context, pool *pgxpool.Pool) error {
 
 	_, err := pool.Exec(ctx, query)
 
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func setOrderTableName(query string) string {

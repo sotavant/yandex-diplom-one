@@ -64,12 +64,12 @@ func (wd *WithdrawnRepository) Store(ctx context.Context, withdrawn domain.Withd
 		where id = $3
 	`)
 
-	_, err = wd.DBPoll.Query(ctx, query, withdrawn.OrderNum, withdrawn.UserID, withdrawn.Sum)
+	_, err = tx.Query(ctx, query, withdrawn.OrderNum, withdrawn.UserID, withdrawn.Sum)
 	if err != nil {
 		return err
 	}
 
-	_, err = wd.DBPoll.Query(ctx, userQuery, withdrawn.Sum, withdrawn.Sum, withdrawn.UserID)
+	_, err = tx.Query(ctx, userQuery, withdrawn.Sum, withdrawn.Sum, withdrawn.UserID)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,10 @@ func createWithdrawnTable(ctx context.Context, pool *pgxpool.Pool) error {
 
 	_, err := pool.Exec(ctx, query)
 
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func setWithdrawnTableName(query string) string {

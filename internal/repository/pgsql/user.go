@@ -80,7 +80,10 @@ func createUsersTable(ctx context.Context, pool *pgxpool.Pool) error {
 
 	_, err := pool.Exec(ctx, query)
 
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func addColumns(ctx context.Context, pool *pgxpool.Pool) error {
@@ -91,7 +94,10 @@ func addColumns(ctx context.Context, pool *pgxpool.Pool) error {
 
 	_, err := pool.Exec(ctx, query)
 
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func setUserTableName(query string) string {
