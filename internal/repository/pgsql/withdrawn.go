@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const withdrawnTableName = "withdrawn"
+const WithdrawnTableName = "withdrawn"
 
 type WithdrawnRepository struct {
 	DBPoll *pgxpool.Pool
@@ -91,7 +91,7 @@ func createWithdrawnTable(ctx context.Context, pool *pgxpool.Pool) error {
 					references public.users,
 			sum      float8                 not null,
 			processed_at timestamp default now() not null
-		);`, "#T#", withdrawnTableName)
+		);`, "#T#", WithdrawnTableName)
 
 	_, err := pool.Exec(ctx, query)
 
@@ -102,7 +102,7 @@ func createWithdrawnTable(ctx context.Context, pool *pgxpool.Pool) error {
 }
 
 func setWithdrawnTableName(query string) string {
-	return strings.ReplaceAll(query, "#T#", withdrawnTableName)
+	return strings.ReplaceAll(query, "#T#", WithdrawnTableName)
 }
 
 func (wd *WithdrawnRepository) getOne(ctx context.Context, query string, args ...interface{}) (wdres domain.Withdrawn, err error) {

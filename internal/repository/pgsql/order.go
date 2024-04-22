@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const ordersTableName = "orders"
+const OrdersTableName = "orders"
 
 type OrderRepository struct {
 	DBPoll *pgxpool.Pool
@@ -155,7 +155,7 @@ func createOrdersTable(ctx context.Context, pool *pgxpool.Pool) error {
 			status      varchar                 not null,
 			accrual     float8,
 			uploaded_at timestamp default now() not null
-		);`, "#T#", ordersTableName)
+		);`, "#T#", OrdersTableName)
 
 	_, err := pool.Exec(ctx, query)
 
@@ -166,5 +166,5 @@ func createOrdersTable(ctx context.Context, pool *pgxpool.Pool) error {
 }
 
 func setOrderTableName(query string) string {
-	return strings.ReplaceAll(query, "#T#", ordersTableName)
+	return strings.ReplaceAll(query, "#T#", OrdersTableName)
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const usersTableName = "users"
+const UsersTableName = "users"
 
 type UserRepository struct {
 	DBPoll *pgxpool.Pool
@@ -76,7 +76,7 @@ func createUsersTable(ctx context.Context, pool *pgxpool.Pool) error {
 			id    serial primary key,
 			login  varchar not null,
 			password varchar not null
-		);`, "#T#", usersTableName)
+		);`, "#T#", UsersTableName)
 
 	_, err := pool.Exec(ctx, query)
 
@@ -90,7 +90,7 @@ func addColumns(ctx context.Context, pool *pgxpool.Pool) error {
 	query := strings.ReplaceAll(`
 		alter table #T# add column if not exists current float8 default 0;
 		alter table #T# add column if not exists withdrawn float8 default 0;
-	`, "#T#", usersTableName)
+	`, "#T#", UsersTableName)
 
 	_, err := pool.Exec(ctx, query)
 
@@ -101,5 +101,5 @@ func addColumns(ctx context.Context, pool *pgxpool.Pool) error {
 }
 
 func setUserTableName(query string) string {
-	return strings.ReplaceAll(query, "#T#", usersTableName)
+	return strings.ReplaceAll(query, "#T#", UsersTableName)
 }
