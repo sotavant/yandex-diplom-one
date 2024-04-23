@@ -28,7 +28,7 @@ func NewOrderRepository(ctx context.Context, pool *pgxpool.Pool) (*OrderReposito
 func (o *OrderRepository) FindByStatus(ctx context.Context, states []string) ([]domain.Order, error) {
 	var orders []domain.Order
 
-	query := setOrderTableName(`select * from #T# where status = any($1)`)
+	query := setOrderTableName(`select id, number, user_id, status, accrual, uploaded_at from #T# where status = any($1)`)
 
 	rows, err := o.DBPoll.Query(ctx, query, states)
 	if err != nil {
@@ -46,7 +46,7 @@ func (o *OrderRepository) FindByStatus(ctx context.Context, states []string) ([]
 func (o *OrderRepository) FindByUser(ctx context.Context, userID int64) ([]domain.Order, error) {
 	var orders []domain.Order
 
-	query := setOrderTableName(`select * from #T# where user_id = $1 order by uploaded_at asc`)
+	query := setOrderTableName(`select id, number, user_id, status, accrual, uploaded_at from #T# where user_id = $1 order by uploaded_at asc`)
 
 	rows, err := o.DBPoll.Query(ctx, query, userID)
 	if err != nil {
@@ -62,7 +62,7 @@ func (o *OrderRepository) FindByUser(ctx context.Context, userID int64) ([]domai
 }
 
 func (o *OrderRepository) GetByNum(ctx context.Context, orderNum string) (domain.Order, error) {
-	query := setOrderTableName(`select * from #T# where number = $1`)
+	query := setOrderTableName(`select id, number, user_id, status, accrual, uploaded_at from #T# where number = $1`)
 
 	return o.getOne(ctx, query, orderNum)
 }

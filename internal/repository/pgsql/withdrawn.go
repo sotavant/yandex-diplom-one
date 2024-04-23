@@ -27,7 +27,7 @@ func NewWithdrawnRepository(ctx context.Context, pool *pgxpool.Pool) (*Withdrawn
 func (wd *WithdrawnRepository) FindByUser(ctx context.Context, userID int64) ([]domain.Withdrawn, error) {
 	var wds []domain.Withdrawn
 
-	query := setWithdrawnTableName(`select * from #T# where user_id = $1 order by processed_at asc`)
+	query := setWithdrawnTableName(`select id, order_num, user_id, sum, processed_at from #T# where user_id = $1 order by processed_at asc`)
 
 	rows, err := wd.DBPoll.Query(ctx, query, userID)
 	if err != nil {
@@ -43,7 +43,7 @@ func (wd *WithdrawnRepository) FindByUser(ctx context.Context, userID int64) ([]
 }
 
 func (wd *WithdrawnRepository) FindOne(ctx context.Context, orderNum string) (domain.Withdrawn, error) {
-	query := setWithdrawnTableName(`select * from #T# where order_num = $1`)
+	query := setWithdrawnTableName(`select id, order_num, user_id, sum, processed_at from #T# where order_num = $1`)
 
 	return wd.getOne(ctx, query, orderNum)
 }
