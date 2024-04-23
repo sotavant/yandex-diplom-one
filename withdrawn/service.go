@@ -51,6 +51,7 @@ func (s *Service) Add(ctx context.Context, wd *domain.Withdrawn) error {
 
 	err = s.wdRepo.Store(ctx, *wd)
 	if err != nil {
+		internal.Logger.Infow("error in store withdraw", "err", err)
 		return domain.ErrInternalServerError
 	}
 

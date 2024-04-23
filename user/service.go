@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/sotavant/yandex-diplom-one/domain"
 	"github.com/sotavant/yandex-diplom-one/internal"
@@ -91,6 +92,7 @@ func (u *Service) Login(ctx context.Context, user domain.User) (string, error) {
 		return "", domain.ErrBadUserData
 	}
 
+	fmt.Println(user.Password)
 	passwordCorrect, err := checkPassword(user.Password, dbUser.Password)
 	if err != nil {
 		internal.Logger.Infow("error in check passwd", "err", err)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sotavant/yandex-diplom-one/internal"
 	"github.com/sotavant/yandex-diplom-one/internal/repository/pgsql"
 	"github.com/sotavant/yandex-diplom-one/internal/test"
 	"github.com/sotavant/yandex-diplom-one/user"
@@ -16,6 +17,7 @@ import (
 
 func TestUserHandler_Register(t *testing.T) {
 	ctx := context.Background()
+	internal.InitLogger()
 
 	pool, err := test.InitConnection(ctx)
 	assert.NoError(t, err)

@@ -30,7 +30,7 @@ type config struct {
 var Logger zap.SugaredLogger
 
 func InitApp(ctx context.Context) (*App, error) {
-	initLogger()
+	InitLogger()
 	c := initConfig()
 	if err := checkConfig(c); err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func checkConfig(c *config) error {
 	return nil
 }
 
-func initLogger() {
+func InitLogger() {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		panic(err)

@@ -75,7 +75,7 @@ func (a *AccrualWorker) GetOrderInfo(order domain.Order) (domain.OrderAccrual, e
 		Get(a.AccrualAddress + accrualURI + order.Number)
 
 	if err != nil {
-		internal.Logger.Infow("get accrual info error", "err", err)
+		//internal.Logger.Infow("get accrual info error", "err", err)
 		return resOrder, err
 	}
 

@@ -28,23 +28,23 @@ func InitConnection(ctx context.Context) (*pgxpool.Pool, error) {
 
 func CleanData(ctx context.Context, pool *pgxpool.Pool) error {
 	query := `drop table if exists withdrawn, orders, users`
-	/*query1 := `drop table if exists $1`
-	query2 := `drop table if exists $1`*/
 
 	_, err := pool.Exec(ctx, query)
 	if err != nil {
 		return err
 	}
-	/*
-		_, err = pool.Exec(ctx, query1, pgsql.OrdersTableName)
-		if err != nil {
-			return err
-		}
 
-		_, err = pool.Exec(ctx, query2, pgsql.UsersTableName)
-		if err != nil {
-			return err
-		}*/
+	return nil
+}
+
+func AddTestUser(ctx context.Context, login, pass string, pool *pgxpool.Pool) error {
+	query := `insert into #T# (login, password) values ($1, $2)`
+
+	_, err := pool.Exec(ctx, query, login, pass)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
