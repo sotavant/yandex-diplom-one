@@ -15,11 +15,11 @@ func TestAuth(t *testing.T) {
 		status int
 	}
 
-	var userId int64 = 123
+	var userID int64 = 123
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		userContextId := r.Context().Value(user2.ContextUserIDKey{}).(int64)
-		if userContextId != userId {
+		userContextID := r.Context().Value(user2.ContextUserIDKey{}).(int64)
+		if userContextID != userID {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -27,7 +27,7 @@ func TestAuth(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	token, err := auth.BuildJWTString(userId)
+	token, err := auth.BuildJWTString(userID)
 	assert.NoError(t, err)
 
 	tests := []struct {
